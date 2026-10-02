@@ -1,0 +1,1779 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Cancer Evolution Simulator</title>
+
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            background-color: #f4f7f9;
+            color: #222;
+        }
+
+
+        header {
+            background-color: white;
+            padding: 30px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+
+        header h1 {
+            margin: 0;
+            font-size: 32px;
+        }
+
+
+        header p {
+            margin-top: 10px;
+            color: #666;
+        }
+
+
+        .container {
+            max-width: 1100px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+
+        .section {
+            background-color: white;
+            padding: 25px;
+            margin-bottom: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+
+        .section h2 {
+            margin-top: 0;
+        }
+
+
+        .controls {
+            display: grid;
+            gap: 20px;
+        }
+
+
+        .control {
+            display: grid;
+            gap: 8px;
+        }
+
+
+        .control label {
+            font-weight: bold;
+        }
+
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+
+        .value {
+            font-weight: normal;
+            color: #555;
+        }
+
+
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+
+        #runButton {
+            background-color: #222;
+            color: white;
+        }
+
+
+        #resetButton {
+            background-color: #ddd;
+            color: #222;
+        }
+
+
+        button:hover {
+            opacity: 0.85;
+        }
+
+
+        .clone-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+
+        .clone-card {
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+
+        .green-card {
+            background-color: #e8f5e9;
+            border: 2px solid #4caf50;
+        }
+
+
+        .blue-card {
+            background-color: #e3f2fd;
+            border: 2px solid #2196f3;
+        }
+
+
+        .clone-card h3 {
+            margin-top: 0;
+        }
+
+
+        .clone-count {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+
+
+        /* GRAPH */
+
+        .chart-container {
+            width: 100%;
+            height: 500px;
+            position: relative;
+        }
+
+
+        #populationChart {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+
+        .chart-legend {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+
+        .legend-line {
+            width: 30px;
+            height: 4px;
+            border-radius: 2px;
+        }
+
+
+        .green-line {
+            background-color: #4caf50;
+        }
+
+
+        .blue-line {
+            background-color: #2196f3;
+        }
+
+
+        .chemo-line {
+            width: 3px;
+            height: 18px;
+            background-color: #e53935;
+        }
+
+
+        .explanation {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+
+        .log {
+            background-color: #111;
+            color: #eee;
+            padding: 20px;
+            border-radius: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+            font-family: monospace;
+        }
+
+
+        .note {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+
+        @media (max-width: 700px) {
+
+            .clone-container {
+                grid-template-columns: 1fr;
+            }
+
+
+            .buttons {
+                flex-direction: column;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- HEADER -->
+
+    <header>
+
+        <h1>🧬 Cancer Evolution Simulator</h1>
+
+        <p>
+            Explore how mutations, growth rates and chemotherapy
+            can affect cancer cell populations over time.
+        </p>
+
+    </header>
+
+
+
+    <div class="container">
+
+
+        <!-- HOW IT WORKS -->
+
+        <div class="section">
+
+            <h2>How does it work?</h2>
+
+            <p>
+                Cancer cells can acquire mutations as they divide.
+                These mutations can create different groups of cancer
+                cells, called <strong>clones</strong>.
+            </p>
+
+            <p>
+                In this simulation, the original cancer cells are shown
+                in <strong>green</strong>. A mutation can create a new
+                clone, shown in <strong>blue</strong>.
+            </p>
+
+            <p>
+                The blue clone has a slightly higher growth rate than
+                the original clone. This means the two clones can grow
+                at different speeds.
+            </p>
+
+            <p>
+                Chemotherapy is introduced once during the simulation.
+                It reduces both clones, after which the surviving cells
+                can continue growing.
+            </p>
+
+        </div>
+
+
+
+        <!-- CONTROLS -->
+
+        <div class="section">
+
+            <h2>⚙️ Simulation Controls</h2>
+
+
+            <div class="controls">
+
+
+                <!-- MUTATION -->
+
+                <div class="control">
+
+                    <label for="mutation">
+
+                        Mutation Chance:
+
+                        <span
+                            class="value"
+                            id="mutationValue"
+                        >
+                            30%
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="range"
+                        id="mutation"
+                        min="0"
+                        max="100"
+                        value="30"
+                    >
+
+                </div>
+
+
+
+                <!-- GENERATIONS -->
+
+                <div class="control">
+
+                    <label for="generations">
+
+                        Number of Generations:
+
+                        <span
+                            class="value"
+                            id="generationValue"
+                        >
+                            20
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="range"
+                        id="generations"
+                        min="5"
+                        max="50"
+                        value="20"
+                    >
+
+                </div>
+
+
+
+                <!-- CHEMOTHERAPY -->
+
+                <div class="control">
+
+                    <label for="chemotherapy">
+
+                        Chemotherapy Strength:
+
+                        <span
+                            class="value"
+                            id="chemotherapyValue"
+                        >
+                            0%
+                        </span>
+
+                    </label>
+
+
+                    <input
+                        type="range"
+                        id="chemotherapy"
+                        min="0"
+                        max="100"
+                        value="0"
+                    >
+
+                </div>
+
+            </div>
+
+
+
+            <div class="buttons">
+
+                <button
+                    id="runButton"
+                    onclick="runSimulation()"
+                >
+                    ▶ Run Simulation
+                </button>
+
+
+                <button
+                    id="resetButton"
+                    onclick="resetSimulation()"
+                >
+                    ↺ Reset
+                </button>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- CLONE POPULATIONS -->
+
+        <div class="section">
+
+            <h2>🧫 Clone Populations</h2>
+
+
+            <div class="clone-container">
+
+
+                <!-- GREEN -->
+
+                <div class="clone-card green-card">
+
+                    <h3>🟢 Original Clone</h3>
+
+
+                    <div
+                        class="clone-count"
+                        id="greenCount"
+                    >
+                        1
+                    </div>
+
+
+                    <p>
+                        Original cancer cells
+                    </p>
+
+
+                    <p>
+                        Growth rate: <strong>2.0</strong>
+                    </p>
+
+                </div>
+
+
+
+                <!-- BLUE -->
+
+                <div class="clone-card blue-card">
+
+                    <h3>🔵 Mutated Clone</h3>
+
+
+                    <div
+                        class="clone-count"
+                        id="blueCount"
+                    >
+                        0
+                    </div>
+
+
+                    <p>
+                        Cancer cells with an additional mutation
+                    </p>
+
+
+                    <p>
+                        Growth rate: <strong>2.3</strong>
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- GRAPH -->
+
+        <div class="section">
+
+            <h2>📈 Population Over Time</h2>
+
+
+            <div class="chart-container">
+
+                <canvas id="populationChart"></canvas>
+
+            </div>
+
+
+            <div class="chart-legend">
+
+                <div class="legend-item">
+
+                    <div class="legend-line green-line"></div>
+
+                    <span>Original Clone</span>
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <div class="legend-line blue-line"></div>
+
+                    <span>Mutated Clone</span>
+
+                </div>
+
+
+                <div class="legend-item">
+
+                    <div class="chemo-line"></div>
+
+                    <span>Chemotherapy</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- WHAT HAPPENED -->
+
+        <div class="section">
+
+            <h2>🔎 What happened?</h2>
+
+
+            <div
+                class="explanation"
+                id="explanation"
+            >
+                Run the simulation to see what happens.
+            </div>
+
+        </div>
+
+
+
+        <!-- SIMULATION LOG -->
+
+        <div class="section">
+
+            <h2>📋 Simulation Log</h2>
+
+
+            <div
+                class="log"
+                id="log"
+            >
+                No simulation run yet.
+            </div>
+
+        </div>
+
+
+
+        <!-- MODEL NOTE -->
+
+        <div class="section">
+
+            <h2>ℹ️ Model Note</h2>
+
+
+            <p class="note">
+
+                This is a simplified educational model rather than
+                a realistic model of cancer growth.
+
+                <br><br>
+
+                The green population represents the original cancer
+                clone. The blue population represents a clone that
+                arose after an additional mutation.
+
+                <br><br>
+
+                The mutation is modelled as giving the blue clone
+                a higher growth rate. It does not mean that the blue
+                cells are automatically more cancerous or
+                chemotherapy-resistant.
+
+                <br><br>
+
+                Chemotherapy is modelled as a single treatment that
+                removes a proportion of both clones. The surviving
+                cells can then continue to grow.
+
+            </p>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- JAVASCRIPT -->
+
+    <script>
+
+
+        // ==========================================
+        // UPDATE SLIDER LABELS
+        // ==========================================
+
+        function updateLabels() {
+
+            document.getElementById("mutationValue").textContent =
+                document.getElementById("mutation").value + "%";
+
+
+            document.getElementById("generationValue").textContent =
+                document.getElementById("generations").value;
+
+
+            document.getElementById("chemotherapyValue").textContent =
+                document.getElementById("chemotherapy").value + "%";
+
+        }
+
+
+
+        // ==========================================
+        // FORMAT LARGE NUMBERS
+        // ==========================================
+
+        function formatNumber(number) {
+
+            if (number >= 1000000) {
+
+                return (
+                    (number / 1000000).toFixed(1)
+                    + "M"
+                );
+
+            }
+
+
+            if (number >= 1000) {
+
+                return (
+                    (number / 1000).toFixed(1)
+                    + "k"
+                );
+
+            }
+
+
+            return Math.round(number);
+
+        }
+
+
+
+        // ==========================================
+        // DRAW GRAPH
+        // ==========================================
+
+        function drawGraph(
+            green_history,
+            blue_history,
+            chemotherapy_generation,
+            chemotherapy
+        ) {
+
+            let canvas =
+                document.getElementById("populationChart");
+
+
+            let ctx =
+                canvas.getContext("2d");
+
+
+            let width =
+                canvas.clientWidth;
+
+
+            let height =
+                canvas.clientHeight;
+
+
+            if (width === 0 || height === 0) {
+                return;
+            }
+
+
+            let pixelRatio =
+                window.devicePixelRatio || 1;
+
+
+            canvas.width =
+                width * pixelRatio;
+
+
+            canvas.height =
+                height * pixelRatio;
+
+
+            ctx.setTransform(
+                pixelRatio,
+                0,
+                0,
+                pixelRatio,
+                0,
+                0
+            );
+
+
+            ctx.clearRect(
+                0,
+                0,
+                width,
+                height
+            );
+
+
+            // ==========================================
+            // GRAPH SIZE
+            // ==========================================
+
+            let left = 70;
+            let right = 30;
+            let top = 30;
+            let bottom = 60;
+
+
+            let graphWidth =
+                width - left - right;
+
+
+            let graphHeight =
+                height - top - bottom;
+
+
+
+            // ==========================================
+            // FIND MAXIMUM
+            // ==========================================
+
+            let allValues =
+                green_history.concat(
+                    blue_history
+                );
+
+
+            let maxPopulation =
+                Math.max(...allValues);
+
+
+            if (
+                !isFinite(maxPopulation) ||
+                maxPopulation <= 0
+            ) {
+
+                maxPopulation = 1;
+
+            }
+
+
+            maxPopulation =
+                maxPopulation * 1.1;
+
+
+
+            // ==========================================
+            // GRID
+            // ==========================================
+
+            ctx.strokeStyle = "#dddddd";
+
+            ctx.lineWidth = 1;
+
+
+            for (
+                let i = 0;
+                i <= 5;
+                i++
+            ) {
+
+                let y =
+                    top +
+                    graphHeight -
+                    (i / 5) * graphHeight;
+
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    left,
+                    y
+                );
+
+                ctx.lineTo(
+                    left + graphWidth,
+                    y
+                );
+
+                ctx.stroke();
+
+
+                let value =
+                    maxPopulation * (i / 5);
+
+
+                ctx.fillStyle =
+                    "#555555";
+
+                ctx.font =
+                    "12px Arial";
+
+                ctx.textAlign =
+                    "right";
+
+
+                ctx.fillText(
+                    formatNumber(value),
+                    left - 10,
+                    y + 4
+                );
+
+            }
+
+
+
+            // ==========================================
+            // AXES
+            // ==========================================
+
+            ctx.strokeStyle =
+                "#333333";
+
+            ctx.lineWidth =
+                2;
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                left,
+                top
+            );
+
+            ctx.lineTo(
+                left,
+                top + graphHeight
+            );
+
+            ctx.stroke();
+
+
+            ctx.beginPath();
+
+            ctx.moveTo(
+                left,
+                top + graphHeight
+            );
+
+            ctx.lineTo(
+                left + graphWidth,
+                top + graphHeight
+            );
+
+            ctx.stroke();
+
+
+
+            // ==========================================
+            // X AXIS
+            // ==========================================
+
+            let numberOfGenerations =
+                green_history.length - 1;
+
+
+            ctx.fillStyle =
+                "#555555";
+
+            ctx.font =
+                "12px Arial";
+
+            ctx.textAlign =
+                "center";
+
+
+            let labelStep =
+                Math.max(
+                    1,
+                    Math.ceil(
+                        numberOfGenerations / 10
+                    )
+                );
+
+
+            for (
+                let generation = 0;
+                generation <= numberOfGenerations;
+                generation += labelStep
+            ) {
+
+                let x =
+                    left +
+                    (
+                        generation /
+                        numberOfGenerations
+                    ) *
+                    graphWidth;
+
+
+                ctx.fillText(
+                    generation,
+                    x,
+                    top + graphHeight + 25
+                );
+
+            }
+
+
+
+            // ==========================================
+            // AXIS TITLES
+            // ==========================================
+
+            ctx.fillStyle =
+                "#333333";
+
+            ctx.font =
+                "bold 13px Arial";
+
+
+            ctx.textAlign =
+                "center";
+
+
+            ctx.fillText(
+                "Generation",
+                left + graphWidth / 2,
+                height - 15
+            );
+
+
+            ctx.save();
+
+
+            ctx.translate(
+                18,
+                top + graphHeight / 2
+            );
+
+
+            ctx.rotate(
+                -Math.PI / 2
+            );
+
+
+            ctx.fillText(
+                "Number of Cells",
+                0,
+                0
+            );
+
+
+            ctx.restore();
+
+
+
+            // ==========================================
+            // X POSITION
+            // ==========================================
+
+            function getX(generation) {
+
+                return (
+                    left +
+                    (
+                        generation /
+                        numberOfGenerations
+                    ) *
+                    graphWidth
+                );
+
+            }
+
+
+
+            // ==========================================
+            // Y POSITION
+            // ==========================================
+
+            function getY(value) {
+
+                return (
+                    top +
+                    graphHeight -
+                    (
+                        value /
+                        maxPopulation
+                    ) *
+                    graphHeight
+                );
+
+            }
+
+
+
+            // ==========================================
+            // DRAW LINE FUNCTION
+            // ==========================================
+
+            function drawLine(
+                history,
+                colour
+            ) {
+
+                ctx.strokeStyle =
+                    colour;
+
+                ctx.lineWidth =
+                    3;
+
+                ctx.beginPath();
+
+
+                for (
+                    let i = 0;
+                    i < history.length;
+                    i++
+                ) {
+
+                    let x =
+                        getX(i);
+
+
+                    let y =
+                        getY(
+                            history[i]
+                        );
+
+
+                    if (i === 0) {
+
+                        ctx.moveTo(
+                            x,
+                            y
+                        );
+
+                    }
+
+                    else {
+
+                        ctx.lineTo(
+                            x,
+                            y
+                        );
+
+                    }
+
+                }
+
+
+                ctx.stroke();
+
+            }
+
+
+
+            // ==========================================
+            // GREEN LINE
+            // ==========================================
+
+            drawLine(
+                green_history,
+                "#4caf50"
+            );
+
+
+
+            // ==========================================
+            // BLUE LINE
+            // ==========================================
+
+            drawLine(
+                blue_history,
+                "#2196f3"
+            );
+
+
+
+            // ==========================================
+            // CHEMOTHERAPY LINE
+            // ==========================================
+
+            if (chemotherapy > 0) {
+
+                let chemoX =
+                    getX(
+                        chemotherapy_generation
+                    );
+
+
+                ctx.strokeStyle =
+                    "#e53935";
+
+                ctx.lineWidth =
+                    2;
+
+                ctx.setLineDash(
+                    [6, 6]
+                );
+
+
+                ctx.beginPath();
+
+                ctx.moveTo(
+                    chemoX,
+                    top
+                );
+
+                ctx.lineTo(
+                    chemoX,
+                    top + graphHeight
+                );
+
+                ctx.stroke();
+
+
+                ctx.setLineDash([]);
+
+
+                ctx.fillStyle =
+                    "#e53935";
+
+                ctx.font =
+                    "bold 12px Arial";
+
+                ctx.textAlign =
+                    "center";
+
+
+                ctx.fillText(
+                    "CHEMOTHERAPY",
+                    chemoX,
+                    top + 15
+                );
+
+            }
+
+
+
+            // ==========================================
+            // GREEN POINTS
+            // ==========================================
+
+            ctx.fillStyle =
+                "#4caf50";
+
+
+            for (
+                let i = 0;
+                i < green_history.length;
+                i++
+            ) {
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    getX(i),
+                    getY(
+                        green_history[i]
+                    ),
+                    3,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fill();
+
+            }
+
+
+
+            // ==========================================
+            // BLUE POINTS
+            // ==========================================
+
+            ctx.fillStyle =
+                "#2196f3";
+
+
+            for (
+                let i = 0;
+                i < blue_history.length;
+                i++
+            ) {
+
+                ctx.beginPath();
+
+                ctx.arc(
+                    getX(i),
+                    getY(
+                        blue_history[i]
+                    ),
+                    3,
+                    0,
+                    Math.PI * 2
+                );
+
+                ctx.fill();
+
+            }
+
+        }
+
+
+
+        // ==========================================
+        // RUN SIMULATION
+        // ==========================================
+
+        function runSimulation() {
+
+
+            // ==========================================
+            // STARTING POPULATIONS
+            // ==========================================
+
+            let green_cells =
+                1;
+
+
+            let blue_cells =
+                0;
+
+
+
+            // ==========================================
+            // GET SLIDER VALUES
+            // ==========================================
+
+            let generations =
+                Number(
+                    document.getElementById(
+                        "generations"
+                    ).value
+                );
+
+
+            let mutation_chance =
+                Number(
+                    document.getElementById(
+                        "mutation"
+                    ).value
+                ) / 100;
+
+
+            let chemotherapy =
+                Number(
+                    document.getElementById(
+                        "chemotherapy"
+                    ).value
+                ) / 100;
+
+
+
+            // ==========================================
+            // GROWTH RATES
+            // ==========================================
+
+            let green_growth =
+                2.0;
+
+
+            let blue_growth =
+                2.3;
+
+
+
+            // ==========================================
+            // CHEMOTHERAPY GENERATION
+            // ==========================================
+
+            let chemotherapy_generation =
+                Math.floor(
+                    generations / 2
+                );
+
+
+
+            // ==========================================
+            // HISTORY
+            // ==========================================
+
+            let green_history =
+                [];
+
+
+            let blue_history =
+                [];
+
+
+
+            // ==========================================
+            // LOG
+            // ==========================================
+
+            let result =
+                "";
+
+
+
+            // ==========================================
+            // EVENT TRACKING
+            // ==========================================
+
+            let mutationHappened =
+                false;
+
+
+            let mutationGeneration =
+                null;
+
+
+            let chemotherapyHappened =
+                false;
+
+
+
+            // ==========================================
+            // SAVE STARTING POPULATION
+            // ==========================================
+
+            green_history.push(
+                green_cells
+            );
+
+
+            blue_history.push(
+                blue_cells
+            );
+
+
+            result +=
+                "Generation 0 — Green: 1 cells | Blue: 0 cells<br>";
+
+
+
+            // ==========================================
+            // SIMULATION
+            // ==========================================
+
+            for (
+                let generation = 1;
+                generation <= generations;
+                generation++
+            ) {
+
+
+                // ======================================
+                // GROWTH
+                // ======================================
+
+                green_cells =
+                    Math.round(
+                        green_cells *
+                        green_growth
+                    );
+
+
+                blue_cells =
+                    Math.round(
+                        blue_cells *
+                        blue_growth
+                    );
+
+
+
+                // ======================================
+                // MUTATION
+                // ======================================
+
+                if (
+                    green_cells > 0 &&
+                    blue_cells === 0 &&
+                    Math.random() < mutation_chance
+                ) {
+
+                    green_cells =
+                        green_cells - 1;
+
+
+                    blue_cells =
+                        1;
+
+
+                    mutationHappened =
+                        true;
+
+
+                    mutationGeneration =
+                        generation;
+
+
+                    result +=
+                        "<strong>🧬 MUTATION!</strong> " +
+                        "A new blue clone appeared at generation " +
+                        generation +
+                        ".<br>";
+
+                }
+
+
+
+                // ======================================
+                // CHEMOTHERAPY
+                // ======================================
+
+                if (
+                    chemotherapy > 0 &&
+                    generation === chemotherapy_generation
+                ) {
+
+                    let survival =
+                        1 - chemotherapy;
+
+
+                    green_cells =
+                        Math.max(
+                            0,
+                            Math.round(
+                                green_cells *
+                                survival
+                            )
+                        );
+
+
+                    blue_cells =
+                        Math.max(
+                            0,
+                            Math.round(
+                                blue_cells *
+                                survival
+                            )
+                        );
+
+
+                    chemotherapyHappened =
+                        true;
+
+
+                    result +=
+                        "<strong>💊 CHEMOTHERAPY!</strong> " +
+                        Math.round(
+                            chemotherapy * 100
+                        ) +
+                        "% of both clones were removed at generation " +
+                        generation +
+                        ".<br>";
+
+                }
+
+
+
+                // ======================================
+                // SAVE POPULATION
+                // ======================================
+
+                green_history.push(
+                    green_cells
+                );
+
+
+                blue_history.push(
+                    blue_cells
+                );
+
+
+
+                // ======================================
+                // LOG
+                // ======================================
+
+                result +=
+                    "Generation " +
+                    generation +
+                    " — Green: " +
+                    green_cells +
+                    " cells | Blue: " +
+                    blue_cells +
+                    " cells<br>";
+
+            }
+
+
+
+            // ==========================================
+            // FINAL COUNTS
+            // ==========================================
+
+            let finalGreen =
+                green_history[
+                    green_history.length - 1
+                ];
+
+
+            let finalBlue =
+                blue_history[
+                    blue_history.length - 1
+                ];
+
+
+            document.getElementById(
+                "greenCount"
+            ).textContent =
+                finalGreen.toLocaleString();
+
+
+            document.getElementById(
+                "blueCount"
+            ).textContent =
+                finalBlue.toLocaleString();
+
+
+
+            // ==========================================
+            // EXPLANATION
+            // ==========================================
+
+            let explanation =
+                "";
+
+
+            if (!mutationHappened) {
+
+                explanation =
+                    "<strong>No mutation occurred.</strong><br><br>" +
+
+                    "The original green clone continued " +
+                    "growing throughout the simulation. " +
+
+                    "The mutation chance determines whether a " +
+                    "new blue clone appears.";
+
+            }
+
+            else {
+
+                explanation =
+                    "<strong>🧬 A mutation created a new clone.</strong><br><br>" +
+
+                    "At generation " +
+                    mutationGeneration +
+                    ", one green cell was changed into a blue cell " +
+                    "representing a new mutated clone.<br><br>" +
+
+                    "The blue clone has a higher growth rate " +
+                    "(2.3 compared with 2.0 for the green clone). " +
+
+                    "Therefore, once it appears, it can increase " +
+                    "faster than the original clone.";
+
+            }
+
+
+
+            if (chemotherapyHappened) {
+
+                explanation +=
+                    "<br><br>" +
+
+                    "<strong>💊 Chemotherapy was introduced " +
+                    "halfway through the simulation.</strong><br><br>" +
+
+                    "The treatment removed a proportion of both " +
+                    "clones. The surviving cells then continued " +
+                    "growing.<br><br>" +
+
+                    "The red line on the graph shows when the " +
+                    "treatment occurred. The drop in the populations " +
+                    "shows the effect of chemotherapy.";
+
+            }
+
+            else {
+
+                explanation +=
+                    "<br><br>" +
+
+                    "<strong>No chemotherapy was used.</strong><br><br>" +
+
+                    "Both clones continued growing according to " +
+                    "their different growth rates.";
+
+            }
+
+
+
+            document.getElementById(
+                "explanation"
+            ).innerHTML =
+                explanation;
+
+
+
+            // ==========================================
+            // DISPLAY LOG
+            // ==========================================
+
+            document.getElementById(
+                "log"
+            ).innerHTML =
+                result;
+
+
+
+            // ==========================================
+            // DRAW GRAPH
+            // ==========================================
+
+            drawGraph(
+                green_history,
+                blue_history,
+                chemotherapy_generation,
+                chemotherapy
+            );
+
+        }
+
+
+
+        // ==========================================
+        // RESET
+        // ==========================================
+
+        function resetSimulation() {
+
+
+            document.getElementById(
+                "mutation"
+            ).value =
+                30;
+
+
+            document.getElementById(
+                "generations"
+            ).value =
+                20;
+
+
+            document.getElementById(
+                "chemotherapy"
+            ).value =
+                0;
+
+
+            updateLabels();
+
+
+            document.getElementById(
+                "greenCount"
+            ).textContent =
+                "1";
+
+
+            document.getElementById(
+                "blueCount"
+            ).textContent =
+                "0";
+
+
+            document.getElementById(
+                "explanation"
+            ).innerHTML =
+                "Run the simulation to see what happens.";
+
+
+            document.getElementById(
+                "log"
+            ).innerHTML =
+                "No simulation run yet.";
+
+
+            let canvas =
+                document.getElementById(
+                    "populationChart"
+                );
+
+
+            let ctx =
+                canvas.getContext("2d");
+
+
+            ctx.clearRect(
+                0,
+                0,
+                canvas.width,
+                canvas.height
+            );
+
+        }
+
+
+
+        // ==========================================
+        // SLIDER EVENTS
+        // ==========================================
+
+        document
+            .getElementById("mutation")
+            .addEventListener(
+                "input",
+                updateLabels
+            );
+
+
+        document
+            .getElementById("generations")
+            .addEventListener(
+                "input",
+                updateLabels
+            );
+
+
+        document
+            .getElementById("chemotherapy")
+            .addEventListener(
+                "input",
+                updateLabels
+            );
+
+
+        // Initial labels
+
+        updateLabels();
+
+    </script>
+
+
+</body>
+
+</html>
